@@ -1,0 +1,26 @@
+{
+    "name": "xenzilla/fuelmon-mts",
+    "description": "Monitor Fuel prices from a specific location in Germany and send notifications on change",
+    "minimum-stability": "stable",
+    "license": "proprietary",
+    "authors": [
+        {
+            "name": "Benedikt Bauer",
+            "email": "benedikt@xenzilla.de"
+        }
+    ],
+    "require": {
+        "fabpot/goutte": "~2.0@dev",
+        "iron-io/iron_mq": "1.5.2",
+        "iron-io/iron_worker": "1.4.2",
+        "iron-io/iron_cache": "0.1.3"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "4.3.*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Xenzilla\\": "src/"
+        }
+    }
+}
