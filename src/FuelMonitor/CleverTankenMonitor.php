@@ -7,15 +7,17 @@
 
 namespace Xenzilla\FuelMonitor;
 
+use Goutte\Client;
 use Symfony\Component\DomCrawler\Crawler;
 
 class CleverTankenMonitor extends FuelMonitor {
     public function fetchPrices() {
         $pricesArray = [];
         $empty = true;
+        $client = new Client();
 
         foreach ($this->fuelTypes as $fuelName => $fuelId) {
-            $crawler = $this->client->request('GET', $this->baseURL.'&spritsorte=' . $fuelId);
+            $crawler = $client->request('GET', $this->baseURL.'&spritsorte=' . $fuelId);
 
             $pricesArray[$fuelName] = [];
             $currentFuel = &$pricesArray[$fuelName];
@@ -34,7 +36,7 @@ class CleverTankenMonitor extends FuelMonitor {
             });
 
             if (empty($currentFuel)) {
-                $httpStatus = $this->client->getResponse()->getStatus();
+                $httpStatus = $client->getResponse()->getStatus();
                 if ($httpStatus == 200) {
                     // Just an empty response
                     // TODO Log the actual error response
@@ -49,8 +51,8 @@ class CleverTankenMonitor extends FuelMonitor {
         }
 
         if (!$empty) {
-            $this->cache->put('rawPrice', json_encode($pricesArray));
-            $this->queue->postMessage('archivedPrice', json_encode(['timestamp' => date('Y-m-d H:i:s')] + $pricesArray), ['delay' => 300, 'expires_in' => 172800]);
+/*            $this->cache->put('rawPrice', json_encode($pricesArray));
+            $this->queue->postMessage('archivedPrice', json_encode(['timestamp' => date('Y-m-d H:i:s')] + $pricesArray), ['delay' => 300, 'expires_in' => 172800]);*/
             print_r($pricesArray);
         }
     }
