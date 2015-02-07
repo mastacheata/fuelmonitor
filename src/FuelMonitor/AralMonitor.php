@@ -1,12 +1,19 @@
 <?php
 /**
  * Author: Benedikt Bauer
- * Date: 10.01.2015
- * Time: 00:12
+ * Date: 07.02.2015
+ * Time: 00:44
  */
 
-namespace Xenzilla\FuelMonitor;
+namespace FuelMonitor;
 
-class AralMonitor extends FuelMonitor {
 
-} 
+use Xenzilla\FuelMonitor\FuelMonitor;
+
+class AralMonitor extends FuelMonitor{
+
+    public function fetchPrices()
+    {
+        // TODO: Implement fetchPrices() method.
+    }
+}

@@ -7,37 +7,38 @@
 
 namespace Xenzilla\FuelMonitor;
 
-use SebastianBergmann\Exporter\Exception;
+use GuzzleHttp\Client;
 
 class VollerTankMonitor extends FuelMonitor {
-    public function fetchPrices()
-    {
-        $notification = "";
+    public function fetchPrices() {
+        $client = new Client();
 
-        $client = new \GuzzleHttp\Client();
-        $requests = [];
         foreach ($this->fuelTypes as $fuelName => $fuelId) {
             $request = $client->createRequest('POST', $this->baseURL, ['body' => [$this->location + ['fueltype' => $fuelId]]]);
-            $client->send($request);
             $response = $client->send($request);
             $json = $response->json();
-            $currentFuel = [];
             $comparePrice = 0.000;
+            $currentFuel = [];
 
             foreach ($json['full_result_set'] as $station) {
                 if (array_key_exists($station['uid'], $this->idMap)) {
                     $currentFuel[$this->idMap[$station['uid']]] = floatval($station['price']);
                 } elseif (array_key_exists('_'.$station['uid'], $this->idMap)) {
-                    $comparePrice = floatval($station['price']);
+                    $comparePrice = floatval($station['price']) + 0.020;
                 }
             }
-            if (min($currentFuel) < $comparePrice) {
-                $notification .= $fuelName." : ".min($currentFuel)." (".array_search(min($currentFuel), $currentFuel).") < ".$comparePrice."\n";
-            }
-            else {
-                $notification .= $fuelName." : ".min($currentFuel)." (".array_search(min($currentFuel), $currentFuel).") > ".$comparePrice."\n";
-            }
+
+            $this->newPrices->$fuelName = $currentFuel;
+            $this->comparePrices->$fuelName = $comparePrice;
+            $this->minPrices[$fuelName] = $this->findCheapest($fuelName);
         }
-        var_dump($notification);
+
+        if (empty(array_filter($this->minPrices))) {
+            $this->logger->addInfo('Prices unchanged', $this->minPrices);
+            return false;
+        }
+        else {
+            return true;
+        }
     }
 } 
