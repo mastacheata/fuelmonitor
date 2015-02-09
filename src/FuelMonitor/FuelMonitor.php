@@ -191,7 +191,7 @@ abstract class FuelMonitor {
             $this->setCachedPrices($this->minPrices);
         }
         else {
-            $this->logger->addInfo('Duplicate message', $this->minPrices);
+            $this->logger->addInfo('Duplicate message', ['minPrices' => $this->minPrices, 'comparePrices' => (array) $this->comparePrices]);
             return;
         }
 

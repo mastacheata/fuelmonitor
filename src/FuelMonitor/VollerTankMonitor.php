@@ -34,7 +34,7 @@ class VollerTankMonitor extends FuelMonitor {
         }
 
         if (empty(array_filter($this->minPrices))) {
-            $this->logger->addInfo('Prices unchanged', $this->minPrices);
+            $this->logger->addInfo('Prices unchanged', ['newPrices' => (array) $this->newPrices, 'comparePrices' => (array) $this->comparePrices]);
             return false;
         }
         else {
