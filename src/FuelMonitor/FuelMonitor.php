@@ -187,7 +187,7 @@ abstract class FuelMonitor {
     public function notifyUsers() {
         $cachedPrices = $this->getCachedPrices();
 
-        if ($cachedPrices != $this->minPrices) {
+        if (array_values($cachedPrices) != array_values($this->minPrices)) {
             $this->setCachedPrices($this->minPrices);
         }
         else {
