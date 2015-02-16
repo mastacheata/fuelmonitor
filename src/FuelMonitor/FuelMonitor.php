@@ -187,16 +187,34 @@ abstract class FuelMonitor {
     public function notifyUsers() {
         $cachedPrices = $this->getCachedPrices();
 
-        if (array_values($cachedPrices) != array_values($this->minPrices)) {
-            $this->setCachedPrices($this->minPrices);
+        if ($cachedPrices != $this->minPrices) {
+            $newCachedPrices = array();
+
+            if (empty($cachedPrices)) {
+                $this->logger->addError('Cache empty');
+            }
+            else {
+                foreach($cachedPrices as $fuelType => $cachedStationPrice) {
+                    if (array_values($cachedStationPrice) != array_values($this->minPrices[$fuelType])) {
+                        $newCachedPrices[$fuelType] = $this->minPrices[$fuelType];
+                    }
+                }
+            }
+
+            if (!empty(array_filter($newCachedPrices)) || empty($cachedPrices)) {
+                $this->setCachedPrices($newCachedPrices);
+            }
+            else {
+                $this->logger->addInfo('Duplicate message', ['minPrices' => $this->minPrices, 'cachedPrices' => $cachedPrices, 'comparePrices' => (array) $this->comparePrices]);
+                return;
+            }
         }
         else {
-            $this->logger->addInfo('Duplicate message', ['minPrices' => $this->minPrices, 'comparePrices' => (array) $this->comparePrices]);
+            $this->logger->addInfo('Duplicate message', ['minPrices' => $this->minPrices, 'cachedPrices' => $cachedPrices, 'comparePrices' => (array) $this->comparePrices]);
             return;
         }
 
-        // TODO replace test_users by real users (here AND in sendPrices.worker)
-        $users = json_decode(file_get_contents('test_users.json', true));
+        $users = json_decode(file_get_contents('users.json', true));
 
         $client = new Client(['base_url' => 'https://api.pushover.net/1/']);
         foreach ($users as $user)
