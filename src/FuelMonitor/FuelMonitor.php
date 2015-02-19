@@ -192,6 +192,7 @@ abstract class FuelMonitor {
 
             if (empty($cachedPrices)) {
                 $this->logger->addError('Cache empty');
+                $newCachedPrices = $this->minPrices;
             }
             else {
                 foreach($cachedPrices as $fuelType => $cachedStationPrice) {
@@ -239,9 +240,12 @@ abstract class FuelMonitor {
                 'body' => $parameters,
             ]);
 
-            if ($response->getStatusCode() === 200) {
+            if ($response->getStatusCode() == 200) {
                 $this->logger->addDebug('Message Push successful', $userParameters);
                 $this->logger->addInfo('Pushover Limits', ['count' => $response->getHeader('X-Limit-App-Remaining'), 'reset' => date('Y-m-d H:i:s', $response->getHeader('X-Limit-App-Reset'))]);
+            }
+            else {
+                $this->logger->addCritical('Pushover Response Code not OK', ['responseBody' => (string) $response->getBody(), 'responseCode' => $response->getStatusCode()]);
             }
         }
     }
