@@ -11,6 +11,9 @@ use Goutte\Client;
 use Symfony\Component\DomCrawler\Crawler;
 
 class TankenTankenMonitor extends FuelMonitor {
+
+    protected $preferencesFile = 'preferences-tt.json';
+
     public function fetchPrices() {
         $client = new Client();
 

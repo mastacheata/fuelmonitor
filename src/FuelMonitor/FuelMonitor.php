@@ -12,10 +12,18 @@ use Monolog\ErrorHandler;
 use Monolog\Logger;
 use Monolog\Handler\ErrorLogHandler;
 use Monolog\Handler\RavenHandler;
+use Monolog\Handler\RollbarHandler;
+use RollbarNotifier;
 use Raven_Client;
 use Predis\Client as Redis;
 
 abstract class FuelMonitor {
+
+    /**
+     * Location and filename for preferences JSON
+     * @var string
+     */
+    protected $preferencesFile;
 
     /**
      * Message cache
@@ -108,7 +116,7 @@ abstract class FuelMonitor {
         $logging = [];
         $pushoverDefaultParameters = [];
 
-        extract(json_decode(file_get_contents('preferences.json', true), true), EXTR_IF_EXISTS);
+        extract(json_decode(file_get_contents($this->preferencesFile, true), true), EXTR_IF_EXISTS);
 
         $this->baseURL = $base_url;
         $this->fuelTypes = $fuel_types;
@@ -150,6 +158,10 @@ abstract class FuelMonitor {
             if (array_key_exists('raven', $logging)) {
                 $raven = new Raven_Client($logging['raven']);
                 $this->logger->pushHandler(new RavenHandler($raven, $level, $logging['bubble']));
+            }
+            elseif(array_key_exists('rollbar', $logging)) {
+                $rollbar = new RollbarNotifier(array('access_token' => $logging['rollbar']));
+                $this->logger->pushHandler(new RollbarHandler($rollbar, $level, $logging['bubble']));
             }
         }
     }
@@ -195,8 +207,8 @@ abstract class FuelMonitor {
                 $newCachedPrices = $this->minPrices;
             }
             else {
-                foreach($cachedPrices as $fuelType => $cachedStationPrice) {
-                    if (array_values($cachedStationPrice) != array_values($this->minPrices[$fuelType])) {
+                foreach($cachedPrices as $fuelType => $cachedStationPrice) {                   
+                    if (is_array($this->minPrices[$fuelType]) && (array_values($cachedStationPrice) != array_values($this->minPrices[$fuelType]))) {
                         $newCachedPrices[$fuelType] = $this->minPrices[$fuelType];
                     }
                 }
@@ -217,7 +229,7 @@ abstract class FuelMonitor {
 
         $users = json_decode(file_get_contents('users.json', true));
 
-        $client = new Client(['base_url' => 'https://api.pushover.net/1/']);
+        $client = new Client(['base_uri' => 'https://api.pushover.net/1/']);
         foreach ($users as $user)
         {
             $userParameters = ['user' => $user->apikey];
@@ -237,12 +249,12 @@ abstract class FuelMonitor {
 
             $parameters = array_merge($this->pushoverDefaultParameters, $userParameters);
             $response = $client->post('messages.json', [
-                'body' => $parameters,
+                'form_params' => $parameters,
             ]);
 
             if ($response->getStatusCode() == 200) {
                 $this->logger->addDebug('Message Push successful', $userParameters);
-                $this->logger->addInfo('Pushover Limits', ['count' => $response->getHeader('X-Limit-App-Remaining'), 'reset' => date('Y-m-d H:i:s', $response->getHeader('X-Limit-App-Reset'))]);
+                $this->logger->addInfo('Pushover Limits', ['count' => implode($response->getHeader('X-Limit-App-Remaining')), 'reset' => date('Y-m-d H:i:s', implode($response->getHeader('X-Limit-App-Reset')))]);
             }
             else {
                 $this->logger->addCritical('Pushover Response Code not OK', ['responseBody' => (string) $response->getBody(), 'responseCode' => $response->getStatusCode()]);

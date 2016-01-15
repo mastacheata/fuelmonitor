@@ -11,18 +11,21 @@ use Goutte\Client;
 use Symfony\Component\DomCrawler\Crawler;
 
 class CleverTankenMonitor extends FuelMonitor {
+
+    protected $preferencesFile = 'preferences-ct.json';
+
     public function fetchPrices() {
         $pricesArray = [];
         $empty = true;
         $client = new Client();
 
         foreach ($this->fuelTypes as $fuelName => $fuelId) {
-            $crawler = $client->request('GET', $this->baseURL.'&spritsorte=' . $fuelId);
+            $crawler = $client->request('GET', $this->baseURL.'?spritsorte=' . $fuelId.'&r='.$this->location['radius'].'&ort='.$this->location['ort']);
 
             $pricesArray[$fuelName] = [];
             $currentFuel = &$pricesArray[$fuelName];
 
-            $crawler->filter('#main-center-column .price_entry')->each(function (Crawler $node) use (&$currentFuel) {
+            $crawler->filter('#main-content-fuel-station-list a .price-entry')->each(function (Crawler $node) use (&$currentFuel) {
                 // TODO make home station configurable and optional
                 if ($node->attr('id') != 'tankstelle-46554')
                 {

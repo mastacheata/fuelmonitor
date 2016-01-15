@@ -10,13 +10,16 @@ namespace Xenzilla\FuelMonitor;
 use GuzzleHttp\Client;
 
 class VollerTankMonitor extends FuelMonitor {
+
+    protected $preferencesFile = 'preferences-vt.json';
+
     public function fetchPrices() {
         $client = new Client();
 
         foreach ($this->fuelTypes as $fuelName => $fuelId) {
-            $request = $client->createRequest('POST', $this->baseURL, ['body' => [$this->location + ['fueltype' => $fuelId]]]);
-            $response = $client->send($request);
-            $json = $response->json();
+            $response = $client->request('POST', $this->baseURL, ['form_params' => $this->location + ['fueltype' => $fuelId]]);
+
+            $json = json_decode($response->getBody(), true);
             $comparePrice = 0.000;
             $currentFuel = [];
 
