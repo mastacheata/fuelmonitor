@@ -232,7 +232,7 @@ abstract class FuelMonitor {
         $client = new Client(['base_uri' => 'https://api.pushover.net/1/']);
         foreach ($users as $user)
         {
-            $userParameters = ['user' => $user->apikey];
+            $userParameters = ['user_apikey' => $user->apikey, 'user_email' => $user->email];
 
             if (!empty($user->types)) {
                 $userPrices = array_intersect_key(array_filter($this->minPrices), array_flip($user->types));
