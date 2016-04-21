@@ -218,12 +218,12 @@ abstract class FuelMonitor {
                 $this->setCachedPrices($newCachedPrices);
             }
             else {
-                $this->logger->addInfo('Duplicate message', ['minPrices' => $this->minPrices, 'cachedPrices' => $cachedPrices, 'comparePrices' => (array) $this->comparePrices]);
+                $this->logger->addInfo('No cached Prices', ['minPrices' => $this->minPrices, 'cachedPrices' => $cachedPrices, 'comparePrices' => (array) $this->comparePrices]);
                 return;
             }
         }
         else {
-            $this->logger->addInfo('Duplicate message', ['minPrices' => $this->minPrices, 'cachedPrices' => $cachedPrices, 'comparePrices' => (array) $this->comparePrices]);
+            $this->logger->addInfo('Cached Prices == new Prices', ['minPrices' => $this->minPrices, 'cachedPrices' => $cachedPrices, 'comparePrices' => (array) $this->comparePrices]);
             return;
         }
 
