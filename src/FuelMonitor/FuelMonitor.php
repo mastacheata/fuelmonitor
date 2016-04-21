@@ -8,6 +8,7 @@
 namespace Xenzilla\FuelMonitor;
 
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\ClientException;
 use Monolog\ErrorHandler;
 use Monolog\Logger;
 use Monolog\Handler\ErrorLogHandler;
@@ -93,7 +94,7 @@ abstract class FuelMonitor {
         date_default_timezone_set('Europe/Berlin');
         $this->logger = new Logger('sentry');
         ErrorHandler::register($this->logger);
-        $this->logger->pushHandler(new ErrorLogHandler(), Logger::ERROR);
+        $this->logger->pushHandler(new ErrorLogHandler(0, Logger::ERROR));
         $this->newPrices = new \stdClass();
         $this->comparePrices = new \stdClass();
     }
@@ -196,7 +197,8 @@ abstract class FuelMonitor {
         }
     }
 
-    public function notifyUsers() {
+    public function notifyUsers()
+    {
         $cachedPrices = $this->getCachedPrices();
 
         if ($cachedPrices != $this->minPrices) {
@@ -205,9 +207,8 @@ abstract class FuelMonitor {
             if (empty($cachedPrices)) {
                 $this->logger->addError('Cache empty');
                 $newCachedPrices = $this->minPrices;
-            }
-            else {
-                foreach($cachedPrices as $fuelType => $cachedStationPrice) {                   
+            } else {
+                foreach ($cachedPrices as $fuelType => $cachedStationPrice) {
                     if (is_array($this->minPrices[$fuelType]) && (array_values($cachedStationPrice) != array_values($this->minPrices[$fuelType]))) {
                         $newCachedPrices[$fuelType] = $this->minPrices[$fuelType];
                     }
@@ -215,24 +216,26 @@ abstract class FuelMonitor {
             }
 
             if (!empty(array_filter($newCachedPrices)) || empty($cachedPrices)) {
-                $this->setCachedPrices($newCachedPrices);
-            }
-            else {
-                $this->logger->addInfo('No cached Prices', ['minPrices' => $this->minPrices, 'cachedPrices' => $cachedPrices, 'comparePrices' => (array) $this->comparePrices]);
+                $this->pushNotifications($newCachedPrices);
+            } else {
+                $this->logger->addInfo('No cached Prices', ['minPrices' => $this->minPrices, 'cachedPrices' => $cachedPrices, 'comparePrices' => (array)$this->comparePrices]);
                 return;
             }
-        }
-        else {
-            $this->logger->addInfo('Cached Prices == new Prices', ['minPrices' => $this->minPrices, 'cachedPrices' => $cachedPrices, 'comparePrices' => (array) $this->comparePrices]);
+        } else {
+            $this->logger->addInfo('Cached Prices == new Prices', ['minPrices' => $this->minPrices, 'cachedPrices' => $cachedPrices, 'comparePrices' => (array)$this->comparePrices]);
             return;
         }
+    }
 
+    protected function pushNotifications($newCachedPrices)
+    {
+        $error = false;
         $users = json_decode(file_get_contents('users.json', true));
 
         $client = new Client(['base_uri' => 'https://api.pushover.net/1/']);
         foreach ($users as $user)
         {
-            $userParameters = ['user_apikey' => $user->apikey, 'user_email' => $user->email];
+            $userParameters = ['user' => $user->apiKey, 'user_email' => $user->email];
 
             if (!empty($user->types)) {
                 $userPrices = array_intersect_key(array_filter($this->minPrices), array_flip($user->types));
@@ -247,18 +250,28 @@ abstract class FuelMonitor {
                 $userParameters['message'] = implode("\n", $userPrices);
             }
 
-            $parameters = array_merge($this->pushoverDefaultParameters, $userParameters);
-            $response = $client->post('messages.json', [
-                'form_params' => $parameters,
-            ]);
+            $parameters = array_merge($this->pushoverDefaultParameters, array_intersect_key($userParameters, $this->pushoverDefaultParameters));
+            try {
+                $response = $client->post('messages.json', [
+                    'form_params' => $parameters,
+                ]);
 
-            if ($response->getStatusCode() == 200) {
-                $this->logger->addDebug('Message Push successful', $userParameters);
-                $this->logger->addInfo('Pushover Limits', ['count' => implode($response->getHeader('X-Limit-App-Remaining')), 'reset' => date('Y-m-d H:i:s', implode($response->getHeader('X-Limit-App-Reset')))]);
+                if ($response->getStatusCode() == 200) {
+                    $this->logger->addDebug('Message Push successful', $userParameters);
+                    $this->logger->addInfo('Pushover Limits', ['count' => implode($response->getHeader('X-Limit-App-Remaining')), 'reset' => date('Y-m-d H:i:s', implode($response->getHeader('X-Limit-App-Reset')))]);
+                }
+                else {
+                    $this->logger->addCritical('Pushover Response Code not OK', ['responseBody' => (string) $response->getBody(), 'responseCode' => $response->getStatusCode()]);
+                }
             }
-            else {
-                $this->logger->addCritical('Pushover Response Code not OK', ['responseBody' => (string) $response->getBody(), 'responseCode' => $response->getStatusCode()]);
+            catch (ClientException $e) {
+                $this->logger->addCritical('Pushover Response Code not OK', ['responseBody' => (string) $e->getResponse()->getBody(), 'responseCode' => $e->getResponse()->getStatusCode()]);
+                $error = true;
             }
+        }
+
+        if (!$error) {
+            $this->setCachedPrices($newCachedPrices);
         }
     }
 
