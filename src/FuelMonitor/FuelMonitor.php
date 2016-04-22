@@ -257,7 +257,7 @@ abstract class FuelMonitor {
                 ]);
 
                 if ($response->getStatusCode() == 200) {
-                    $this->logger->addDebug('Message Push successful', ['message' => $parameters['message'], 'user' => ['email' => $parameters['user_email'], 'id' => $parameters['user']]]);
+                    $this->logger->addDebug('Message Push successful', ['message' => $parameters['message'], 'user' => ['email' => $userParameters['user_email'], 'id' => $parameters['user']]]);
                     $this->logger->addInfo('Pushover Limits', ['count' => implode($response->getHeader('X-Limit-App-Remaining')), 'reset' => date('Y-m-d H:i:s', implode($response->getHeader('X-Limit-App-Reset')))]);
                 }
                 else {
