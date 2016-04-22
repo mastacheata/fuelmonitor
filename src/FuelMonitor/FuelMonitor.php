@@ -265,7 +265,7 @@ abstract class FuelMonitor {
                 }
             }
             catch (ClientException $e) {
-                $this->logger->addCritical('Pushover Response Code not OK', ['responseBody' => (string) $e->getResponse()->getBody(), 'responseCode' => $e->getResponse()->getStatusCode()]);
+                $this->logger->addCritical('Pushover Response Code not OK', ['responseBody' => (string) $e->getResponse()->getBody(), 'responseCode' => $e->getResponse()->getStatusCode(), 'request' => (string) $e->getRequest()]);
                 $error = true;
             }
         }
