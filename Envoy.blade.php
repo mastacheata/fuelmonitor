@@ -37,7 +37,7 @@ cd {{ $release_dir }};
 mkdir {{ $release }};
 
 # Download the tarball
-echo 'Fetching project tarball';
+echo 'Fetching project tarball from {{ $repo }}';
 curl -H "Authorization: token {{ $token }}" -sLo {{ $release }}.tar.gz {{ $repo }};
 
 # Extract the tarball
