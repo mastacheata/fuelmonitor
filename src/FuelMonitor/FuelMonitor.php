@@ -157,7 +157,7 @@ abstract class FuelMonitor {
             }
 
             if (array_key_exists('raven', $logging)) {
-                $raven = new Raven_Client($logging['raven']);
+                $raven = new Raven_Client($logging['raven'], [['release' => $logging['version']]]);
                 $this->logger->pushHandler(new RavenHandler($raven, $level, $logging['bubble']));
             }
             elseif(array_key_exists('rollbar', $logging)) {
