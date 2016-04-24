@@ -250,6 +250,11 @@ abstract class FuelMonitor {
                 $userParameters['message'] = implode("\n", $userPrices);
             }
 
+            if (empty(trim($userParameters['message']))) {
+                $this->logger->addError('Empty message', ['user' => ['id' => $user->apiKey, 'email' => $user->email], 'userTypes' => $user->types, 'newCachedPrices' => $newCachedPrices, 'minPrices' => $this->minPrices]);
+                continue;
+            }
+
             $parameters = array_merge($this->pushoverDefaultParameters, array_intersect_key($userParameters, $this->pushoverDefaultParameters));
             try {
                 $response = $client->post('messages.json', [
@@ -265,7 +270,7 @@ abstract class FuelMonitor {
                 }
             }
             catch (ClientException $e) {
-                $this->logger->addCritical('Pushover Response Code not OK', ['responseBody' => (string) $e->getResponse()->getBody(), 'responseCode' => $e->getResponse()->getStatusCode(), 'request' => (string) $e->getRequest()]);
+                $this->logger->addCritical('Pushover Response Code not OK', ['responseBody' => (string) $e->getResponse()->getBody(), 'responseCode' => $e->getResponse()->getStatusCode(), 'request' => (string) $e->getRequest()->getBody()]);
                 $error = true;
             }
         }
