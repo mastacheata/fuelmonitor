@@ -7,9 +7,7 @@
 
 require 'vendor/autoload.php';
 
-chdir(__DIR__);
-
-file_put_contents('../log/cron.log', date('Y-m-d H:i:s').' Script executed'."\n", FILE_APPEND);
+file_put_contents(dirname(dirname($_SERVER['SCRIPT_FILENAME'])).'/log/cron.log', date('Y-m-d H:i:s').' Script executed'."\n", FILE_APPEND);
 
 $fm = new \Xenzilla\FuelMonitor\VollerTankMonitor();
 $fm->setCache();
