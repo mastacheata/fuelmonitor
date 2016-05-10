@@ -7,6 +7,8 @@
 
 require 'vendor/autoload.php';
 
+chdir(__DIR__);
+
 $fm = new \Xenzilla\FuelMonitor\TankenTankenMonitor();
 $fm->setCache();
 $fm->setPreferences();
