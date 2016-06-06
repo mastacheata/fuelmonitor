@@ -24,7 +24,7 @@ class TankenTankenMonitor extends FuelMonitor {
 
             $crawler->filter('div[data-partial="resultlist"] > a')->each(function (Crawler $node) use (&$currentFuel, &$comparePrice) {
                 // TODO make home station configurable and optional
-                $stationId = substr($node->attr('href'), 38);
+                $stationId = strtoupper(substr($node->attr('href'), 38));
                 $priceValue = '';
                 $priceNode = $node->filter('div.price');
 

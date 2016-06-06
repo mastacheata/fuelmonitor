@@ -24,6 +24,7 @@ class VollerTankMonitor extends FuelMonitor {
             $currentFuel = [];
 
             foreach ($json['full_result_set'] as $station) {
+                $station['uid'] = strtoupper($station['uid']);
                 if (array_key_exists($station['uid'], $this->idMap)) {
                     $currentFuel[$this->idMap[$station['uid']]] = floatval($station['price']);
                 } elseif (array_key_exists('_'.$station['uid'], $this->idMap)) {

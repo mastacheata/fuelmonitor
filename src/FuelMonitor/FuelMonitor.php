@@ -61,6 +61,12 @@ abstract class FuelMonitor {
     protected $idMap;
 
     /**
+     * Array of additional parameters used for filtering results
+     * @var array
+     */
+    protected $extraParams;
+
+    /**
      * Array of changed prices to notify users of
      * @var array
      */
@@ -115,6 +121,7 @@ abstract class FuelMonitor {
         $location = [];
         $id_map = [];
         $logging = [];
+        $extra_params = [];
         $pushoverDefaultParameters = [];
 
         extract(json_decode(file_get_contents($this->preferencesFile, true), true), EXTR_IF_EXISTS);
@@ -124,6 +131,7 @@ abstract class FuelMonitor {
         $this->pushoverDefaultParameters = $pushoverDefaultParameters;
         $this->idMap = $id_map;
         $this->location = $location;
+        $this->extraParams = $extra_params;
 
         if (!empty($logging)) {
             $level = Logger::ERROR;
