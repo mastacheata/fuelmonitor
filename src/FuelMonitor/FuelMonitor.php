@@ -92,7 +92,7 @@ abstract class FuelMonitor {
 
     public function __construct() {
         date_default_timezone_set('Europe/Berlin');
-        $this->logger = new Logger('sentry');
+        $this->logger = new Logger('fuelmon-mts');
         ErrorHandler::register($this->logger);
         $this->logger->pushHandler(new ErrorLogHandler(0, Logger::ERROR));
         $this->newPrices = new \stdClass();
@@ -124,8 +124,6 @@ abstract class FuelMonitor {
         $this->pushoverDefaultParameters = $pushoverDefaultParameters;
         $this->idMap = $id_map;
         $this->location = $location;
-
-        $this->logger = new Logger('fuelmon-mts');
 
         if (!empty($logging)) {
             $level = Logger::ERROR;
