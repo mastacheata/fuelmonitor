@@ -65,8 +65,8 @@ ln -nfs source/{{ $release  }} {{ $current_dir }};
 @endtask
 
 @task('link_config)
-echo 'Linking config files into new version workspace'
-cp -rs {{ $base_dir }}/configs/*.json .
+echo 'Linking config files into new version workspace';
+cp -rs {{ $base_dir }}/configs/*.json .;
 @endtask
 
 @task('update_permissions')
@@ -85,5 +85,5 @@ ls -dt {{ $release_dir }}/* | tail -n +8 | xargs -d '\n' rm -rf;
 
 @task('update_version')
 echo 'Updating version number';
-sed -ie "s/\"version\"\(.*\):.*$/\"version\"\1: {{ $build }}/g" preferences-*.json
+sed -ie "s/\"version\"\(.*\):.*$/\"version\"\1: {{ $build }}/g" preferences-*.json;
 @endtask
