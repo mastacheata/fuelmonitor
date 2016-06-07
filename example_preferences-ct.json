@@ -1,0 +1,28 @@
+{
+    "fuel_types": {
+        "Diesel": 3,
+        "Super_E10": 5,
+        "Super_E5": 7
+    },
+    "location": {
+        "ort"   : 53894,
+        "radius": 5
+    },
+    "id_map": {
+        "Schaefer": "tankstelle-46554"
+    },
+    "base_url": "http://www.clever-tanken.de/tankstelle_liste",
+    "pushoverDefaultParameters": {
+        "token"     : "<pushover key>",
+        "title"     : "Neue Preise (Clever Tanken/MTS)",
+        "message"   : "",
+        "user"      : ""
+    },
+    "oldToken": "SnYg8zxtJaujL5k5MBjwLhLCidCkw2",
+    "logging": {
+        "raven"     : "https://https://<key>:<secret>@app.getsentry.com/<project>",
+        "level"     : "debug",
+        "bubble"    : true,
+        "version"   : 1
+    }
+}
