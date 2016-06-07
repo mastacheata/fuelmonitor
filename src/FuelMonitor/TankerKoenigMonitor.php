@@ -6,6 +6,16 @@
  * Time: 22:46
  */
 
+/**
+ * This class consumes the API of Tankerkoenig.de (c) by Martin Kurz
+ * creativecommons.tankerkoenig.de API is licensed under a
+ * Creative Commons Attribution 4.0 International License.
+ *
+ * You should have received a copy of the license along with this
+ * work. If not, see <http://creativecommons.org/licenses/by/4.0/>.
+ * Full license text is included in the LICENSE file at the root of this repository and available free of charge at https://creativecommons.org/licenses/by/4.0/legalcode
+ */
+
 namespace Xenzilla\FuelMonitor;
 
 use GuzzleHttp\Client;
