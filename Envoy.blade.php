@@ -25,6 +25,7 @@ $env         = isset($env) ? $env : 'staging';
 fetch_repo
 run_composer
 update_symlinks
+link_config
 update_permissions
 clean_old_releases
 @endmacro
@@ -61,6 +62,11 @@ echo 'Updating symlinks';
 # Symlink the latest release to the current directory
 echo 'Linking current release';
 ln -nfs source/{{ $release  }} {{ $current_dir }};
+@endtask
+
+@task('link_config)
+echo 'Linking config files into new version workspace'
+cp -rs {{ $base_dir }}/configs/*.json .
 @endtask
 
 @task('update_permissions')
