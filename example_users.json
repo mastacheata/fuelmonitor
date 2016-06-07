@@ -1,0 +1,14 @@
+[
+    {
+        "email": "allgroup@fuelmonitor.app",
+        "apiKey": "pushoverUserOrGroupApiKey",
+        "types": []
+    },
+    {
+        "email": "dieselgroup@fuelmonitor.app",
+        "apiKey": "pushoverUserOrGroupApiKey",
+        "types": [
+            "Diesel"
+        ]
+    }
+]
