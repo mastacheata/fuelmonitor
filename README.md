@@ -8,11 +8,11 @@ The following sources for data are supported:
 * VollerTankMonitor   - http://vollertank.de    => Publicly available, but undocumented JSON API used by the website to fetch data from its own backend
 
 #Usage
-example_preferences-<xy>.json are example configuration files with idMapping for stations to monitor and home station (id prefixed by underscore)
+example_preferences-\<xy\>.json are example configuration files with idMapping for stations to monitor and home station (id prefixed by underscore)
 
 Notification of users happens via Pushover.net => Configure group or user keys in users.json (see example_users.json)
 
-<xy>_getPrices.php is the trigger script for the corresponding service. Run this via cronjob every few minutes (MTS-K backend of the services updates every 5 minutes, so shorter intervals make no sense)
+\<xy\>_getPrices.php is the trigger script for the corresponding service. Run this via cronjob every few minutes (MTS-K backend of the services updates every 5 minutes, so shorter intervals make no sense)
 
 # Extend
 If you'd like to add another service to monitor, just extend the FuelMonitor class and implement the fetchPrices method.
