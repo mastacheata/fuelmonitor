@@ -27,25 +27,24 @@ class TankerKoenigMonitor extends FuelMonitor
         $stack->push($history);
 
         $client = new Client(['handler' => $stack]);
+        $response = $client->request('GET', $this->baseURL, ['query' => array_merge($this->location, $this->extraParams, ['type' => 'all']), 'verify' => false]);
 
+        $json = json_decode($response->getBody(), true);
+        if ($json['status'] !== 'ok') {
+            $lastRequest = end($container);
+            throw new BadResponseException($json['message'], $lastRequest->request, $lastRequest->response);
+        }
+        
         foreach ($this->fuelTypes as $fuelName => $fuelId) {
-            $response = $client->request('GET', $this->baseURL, ['query' => array_merge($this->location, $this->extraParams, ['type' => $fuelId]), 'verify' => false]);
-
-            $json = json_decode($response->getBody(), true);
             $comparePrice = 0.000;
             $currentFuel = [];
-
-            if ($json['status'] !== 'ok') {
-                $lastRequest = end($container);
-                throw new BadResponseException($json['message'], $lastRequest->request, $lastRequest->response);
-            }
 
             foreach ($json['stations'] as $station) {
                 $station['id'] = strtoupper($station['id']);
                 if (array_key_exists($station['id'], $this->idMap)) {
-                    $currentFuel[$this->idMap[$station['id']]] = floatval($station['price']);
+                    $currentFuel[$this->idMap[$station['id']]] = floatval($station[$fuelId]);
                 } elseif (array_key_exists('_'.$station['id'], $this->idMap)) {
-                    $comparePrice = floatval($station['price']) + 0.020;
+                    $comparePrice = floatval($station[$fuelId]) + 0.020;
                 }
             }
 
