@@ -2,9 +2,9 @@
 Monitor MTS-K connected websites for fuel price changes and notify users on change in reference to a "home" station
 
 The following sources for data are supported:
-* CleverTankenMonitor - http://clever-tanken.de => HTML wesbite crawler
-* TankenTankenMonitor - http://tankentanken.de  => HTML website crawler
-* TankerKoenigMonitor - http://tankerkoenig.de  => [Creative Commons CC-BY 4.0](https://creativecommons.org/licenses/by/4.0/legalcode) licensed HTTP/JSON API by [Martin Kurz] (http://creativecommons.tankerkoenig.de)
+* CleverTankenMonitor - http://clever-tanken.de => HTML website crawler
+* TankenTankenMonitor - http://tankentanken.de  => HTML website crawler 
+* TankerKoenigMonitor - http://tankerkoenig.de  => Makes use of the Tankerkönig Spritpreis-API. The API is licensed under [Creative Commons CC-BY 4.0] (https://creativecommons.org/licenses/by/4.0/legalcode). You'll need an API-Key to use this service, which is available free of charge at http://creativecommons.tankerkoenig.de. Usage is subject to further conditions as noted on the website.
 * VollerTankMonitor   - http://vollertank.de    => Publicly available, but undocumented JSON API used by the website to fetch data from its own backend
 
 #Usage
