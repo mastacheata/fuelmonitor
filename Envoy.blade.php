@@ -64,7 +64,7 @@ echo 'Linking current release';
 ln -nfs source/{{ $release  }} {{ $current_dir }};
 @endtask
 
-@task('link_config)
+@task('link_config')
 echo 'Linking config files into new version workspace';
 cp -rs {{ $base_dir }}/configs/*.json .;
 @endtask
