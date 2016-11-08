@@ -66,7 +66,7 @@ ln -nfs source/{{ $release  }} {{ $current_dir }};
 
 @task('link_config')
 echo 'Linking config files into new version workspace';
-cp -rs {{ $base_dir }}/configs/*.json .;
+cp -rs {{ $base_dir }}/configs/*.json ./webroot/;
 @endtask
 
 @task('update_permissions')
