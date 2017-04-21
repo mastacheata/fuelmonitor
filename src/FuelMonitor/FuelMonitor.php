@@ -221,7 +221,7 @@ abstract class FuelMonitor {
                 }
             }
 
-            if (!empty(array_filter($newCachedPrices)) || empty($cachedPrices)) {
+            if (!empty(array_filter($newCachedPrices))) {
                 $this->pushNotifications($newCachedPrices);
             } else {
                 $this->logger->addInfo('No cached Prices', ['minPrices' => $this->minPrices, 'cachedPrices' => $cachedPrices, 'comparePrices' => (array)$this->comparePrices]);
