@@ -13,8 +13,6 @@ use Monolog\ErrorHandler;
 use Monolog\Logger;
 use Monolog\Handler\ErrorLogHandler;
 use Monolog\Handler\RavenHandler;
-use Monolog\Handler\RollbarHandler;
-use RollbarNotifier;
 use Raven_Client;
 use Predis\Client as Redis;
 
@@ -166,10 +164,6 @@ abstract class FuelMonitor {
                 $raven = new Raven_Client($logging['raven'], [['release' => $logging['version']]]);
                 $this->logger->pushHandler(new RavenHandler($raven, $level, $logging['bubble']));
             }
-            elseif(array_key_exists('rollbar', $logging)) {
-                $rollbar = new RollbarNotifier(array('access_token' => $logging['rollbar']));
-                $this->logger->pushHandler(new RollbarHandler($rollbar, $level, $logging['bubble']));
-            }
         }
     }
 
@@ -198,9 +192,8 @@ abstract class FuelMonitor {
         if ($minNew != $comparePrice) {
             return array($minNewStation[0] => $minNew);
         }
-        else {
-            return null;
-        }
+
+	    return null;
     }
 
     public function notifyUsers()
@@ -236,9 +229,12 @@ abstract class FuelMonitor {
     protected function pushNotifications($newCachedPrices)
     {
         $error = false;
-        $users = json_decode(file_get_contents('users.json', true));
+        $users = (array) json_decode(file_get_contents('users.json', true));
 
         $client = new Client(['base_uri' => 'https://api.pushover.net/1/']);
+        $messageEmpty = true;
+        $messageEmptyContext = [];
+
         foreach ($users as $user)
         {
             $userParameters = ['user' => $user->apiKey, 'user_email' => $user->email];
@@ -257,9 +253,11 @@ abstract class FuelMonitor {
             }
 
             if (empty(trim($userParameters['message']))) {
-                $this->logger->addError('Empty message', ['user' => ['id' => $user->apiKey, 'email' => $user->email], 'userTypes' => $user->types, 'newCachedPrices' => $newCachedPrices, 'minPrices' => $this->minPrices]);
+				$messageEmptyContext = ['user' => ['id' => $user->apiKey, 'email' => $user->email], 'userTypes' => $user->types, 'newCachedPrices' => $newCachedPrices, 'minPrices' => $this->minPrices];
                 continue;
             }
+
+            $messageEmpty = false;
 
             $parameters = array_merge($this->pushoverDefaultParameters, array_intersect_key($userParameters, $this->pushoverDefaultParameters));
             try {
@@ -267,7 +265,7 @@ abstract class FuelMonitor {
                     'form_params' => $parameters,
                 ]);
 
-                if ($response->getStatusCode() == 200) {
+                if ($response->getStatusCode() === 200) {
                     $this->logger->addDebug('Message Push successful', ['message' => $parameters['message'], 'user' => ['email' => $userParameters['user_email'], 'id' => $parameters['user']]]);
                     $this->logger->addInfo('Pushover Limits', ['count' => implode($response->getHeader('X-Limit-App-Remaining')), 'reset' => date('Y-m-d H:i:s', implode($response->getHeader('X-Limit-App-Reset')))]);
                 }
@@ -276,9 +274,15 @@ abstract class FuelMonitor {
                 }
             }
             catch (ClientException $e) {
-                $this->logger->addCritical('Pushover Response Code not OK', ['responseBody' => (string) $e->getResponse()->getBody(), 'responseCode' => $e->getResponse()->getStatusCode(), 'request' => (string) $e->getRequest()->getBody()]);
+                if ($e->getResponse()) {
+	                $this->logger->addCritical('Pushover Response Code not OK', ['responseBody' => (string) $e->getResponse()->getBody(), 'responseCode' => $e->getResponse()->getStatusCode(), 'request' => (string) $e->getRequest()->getBody()]);
+                }
                 $error = true;
             }
+        }
+
+        if ($messageEmpty) {
+            $this->logger->addCritical('Empty message', $messageEmptyContext);
         }
 
         if (!$error) {
